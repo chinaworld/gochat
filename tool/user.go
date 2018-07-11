@@ -3,7 +3,9 @@ package tool
 import "sync"
 
 type UserMap struct {
-	UserMap sync.Map
+	Map sync.Map
 }
 
-//func (this *UserMap)
+func (this *UserMap) InitMap(){
+	//this.Map =
+}
