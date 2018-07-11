@@ -31,20 +31,33 @@ func ServerRun(tcp_listen *net.TCPListener) error {
 		//	con.Close()
 		//	fmt.Println("链接已经关闭")
 		//}()
-		fmt.Println("this conn from the :", con.LocalAddr().String())
 		data := make([]byte, 1000)
+		fmt.Println("this conn from the :", con.LocalAddr().String())
 
-		for {
-			con.Read(data)
-			fmt.Println(string(data))
-			msg := tool.Msg{MsgByte: data}
-			err = msg.InitMsg()
-			if err != nil {
-				fmt.Println(err.Error())
-				continue
+		go func() {
+			for {
+
+				//select {
+				//case data := <-resChan:
+				//	doData(data)
+				//case <-time.After(time.Second * 3):
+				//	fmt.Println("request time out")
+				//}
+				con.Read(data)
+				fmt.Println(string(data))
+				msg := tool.Msg{MsgByte: data}
+				data = nil
+				err = msg.InitMsg()
+				if err != nil {
+					fmt.Println(err.Error())
+					continue
+				}
+				_, err = con.Write([]byte("im fine"))
+				if err != nil {
+					con.Close()
+					break
+				}
 			}
-			con.Write([]byte("im fine"))
-		}
-
+		}()
 	}
 }
