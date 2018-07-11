@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func ConHandler(con *net.TCPConn) {
+func ConHandler(con *net.TCPConn, id_map *tool.UserMap) {
 
 	data := make([]byte, 1000)
 
