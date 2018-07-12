@@ -5,7 +5,7 @@ import (
 	"net"
 	"fmt"
 	"gochat/tool"
-	"github.com/astaxie/beego/orm"
+	"gochat/model"
 )
 
 func GetServer(config *config.Config) *net.TCPListener {
@@ -23,8 +23,25 @@ func ServerRun(tcp_listen *net.TCPListener) error {
 	id_map := &tool.UserMap{}
 
 	for {
-
+		logindata := make([]byte, 100)
 		con, err := tcp_listen.AcceptTCP()
+		if err != nil {
+			fmt.Println(err.Error())
+			con.Close()
+		}
+		_, err = con.Read(logindata)
+		if err != nil {
+			fmt.Println(err.Error())
+			con.Close()
+		}
+
+		key := model.Login(logindata)
+		if !key {
+			tool.Msg{U}
+			con.Write()
+			continue
+		}
+
 		if err != nil {
 			fmt.Println("链接失败")
 			continue
@@ -32,6 +49,4 @@ func ServerRun(tcp_listen *net.TCPListener) error {
 		go ConHandler(con, id_map)
 
 	}
-
-	orm.NewOrm().Raw().QueryRows()
 }

@@ -96,17 +96,17 @@ func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error)
 	var err error
 
 	if parse != nil {
-
 		stemt, err := db.Prepare(sql_string)
 		checkErr(err)
 		rows, err = stemt.Query(parse...)
 
 	} else {
-
 		rows, err = db.Query(sql_string)
 		checkErr(err)
-
 	}
+
+	strt := reflect.TypeOf(baseDb).Elem().Elem()
+	slicev := reflect.ValueOf(baseDb).Elem()
 
 	defer rows.Close()
 	checkErr(err)
@@ -120,8 +120,8 @@ func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error)
 	}
 
 	for arry_index := 0; rows.Next(); arry_index++ {
-		t := reflect.TypeOf(baseDb.([]BaseDb)[arry_index]).Elem()
-		v := reflect.ValueOf(baseDb.([]BaseDb)[arry_index]).Elem()
+		vs := make([]reflect.Value, 0)
+		strv := reflect.New(strt).Elem()
 
 		err = rows.Scan(dest...)
 		if err != nil {
@@ -130,30 +130,35 @@ func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error)
 		}
 
 		for k, v1 := range column {
-			for i := 0; i < t.NumField(); i++ {
-				if v1 == t.Field(i).Tag.Get("db") {
+			for i := 0; i < strv.NumField(); i++ {
+
+				if v1 == strv.Type().Field(i).Tag.Get("db") {
 
 					vu := reflect.ValueOf(*dest[k].(*string)).String() //.Convert(v.Field(i).Type())
-					//fmt.Println(vu)
+
 					//check type is int or int32 ...
-					if v.Field(i).Type().Kind() >= 2 && v.Field(i).Type().Kind() <= 6 {
+					if strv.Field(i).Type().Kind() >= 2 && strv.Field(i).Type().Kind() <= 6 {
 						in, err := strconv.Atoi(vu)
 						if err != nil {
 							panic(err.Error())
 						}
-						v.Field(i).Set(reflect.ValueOf(in))
+						strv.Field(i).Set(reflect.ValueOf(in))
+						break
 					}
 
-					if v.Field(i).Type().Kind() == reflect.String {
-						v.Field(i).Set(reflect.ValueOf(vu))
+					if strv.Field(i).Type().Kind() == reflect.String {
+						strv.Field(i).Set(reflect.ValueOf(vu))
+						break
 					}
-
 					break
 				}
 
 			}
 
 		}
+		vs = append(vs, strv)
+		val_arr1 := reflect.Append(slicev, vs...)
+		slicev.Set(val_arr1)
 
 	}
 
