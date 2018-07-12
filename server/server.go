@@ -5,6 +5,7 @@ import (
 	"net"
 	"fmt"
 	"gochat/tool"
+	"github.com/astaxie/beego/orm"
 )
 
 func GetServer(config *config.Config) *net.TCPListener {
@@ -31,4 +32,6 @@ func ServerRun(tcp_listen *net.TCPListener) error {
 		go ConHandler(con, id_map)
 
 	}
+
+	orm.NewOrm().Raw().QueryRows()
 }
