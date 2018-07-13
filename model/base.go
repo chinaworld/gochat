@@ -6,6 +6,7 @@ import (
 	"gochat/config"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 type BaseDb interface {
@@ -152,7 +153,7 @@ func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error)
 							if err != nil {
 								panic(err.Error())
 							}
-							strv.Field(i).Set(reflect.ValueOf(in))
+							strv.Field(i).Set(reflect.ValueOf(in).Convert(strv.Field(i).Type()))
 						} else {
 							strv.Field(i).Set(reflect.ValueOf(0))
 						}
@@ -194,8 +195,14 @@ func Insert(baseDb BaseDb) (int, error) {
 	}
 
 	for i := 0; i < v.Type().Elem().NumField(); i++ {
-		clouns = append(clouns, v.Type().Elem().Field(i).Tag.Get("db"))
+		c := v.Type().Elem().Field(i).Tag.Get("db")
+		cs := strings.Split(c, ":")
+		if len(cs) > 1 && cs[1] == "pr" {
+			continue
+		}
+		clouns = append(clouns, c)
 		values = append(values, v.Elem().Field(i).Interface())
+
 	}
 
 	// 用+拼接效率很低
@@ -214,6 +221,8 @@ func Insert(baseDb BaseDb) (int, error) {
 
 	var err error
 
+	fmt.Println(sql_string)
+	fmt.Println(values)
 	stemt, err := db.Prepare(sql_string)
 	checkErr(err)
 
@@ -223,6 +232,5 @@ func Insert(baseDb BaseDb) (int, error) {
 	id, err := rows.LastInsertId()
 	checkErr(err)
 
-	fmt.Println(sql_string)
 	return int(id), err
 }

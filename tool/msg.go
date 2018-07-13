@@ -37,18 +37,18 @@ func (this *ReturnMsg) LoginErroMsg() ([]byte, error) {
 	return data, nil
 }
 
-func (this *Msg) RelayMsg(id_map *UserMap) {
+func (this *Msg) RelayMsg(id_map *UserMap) bool {
 
 	con_interface, ok := id_map.Map.Load(this.UserId)
 	if !ok {
 		//todo  持久化数据  等待下次上线再去拉
 		histor := model.HistoricalMsg{UserId: this.FormUserId, SendUser: this.UserId, Context: this.Content, CreateTime: time.Now().Unix()}
 		model.Insert(&histor)
-		fmt.Println("用户不在线")
-		return
+			fmt.Println("用户不在线")
+		return false
 	}
 	con := con_interface.(*net.TCPConn)
 	data := append([]byte(this.Content), '\n')
 	con.Write(data)
-
+	return true
 }

@@ -5,6 +5,7 @@ import (
 	"gochat/config"
 	"fmt"
 	"reflect"
+	"strconv"
 	"gochat/model"
 )
 
@@ -39,8 +40,13 @@ func TestDb(t *testing.T) {
 	//model.Query(sql, &user, "1")
 	//fmt.Println(user)
 	//model.Insert(&user)
-	h, err := model.GetHistoricalMsg(2)
-	fmt.Println(len(h), err)
+	//h, err := model.GetHistoricalMsg(2)
+	//fmt.Println(len(h), err)
+
+	for i := 4; i < 1000; i++ {
+		user := User{UserName: strconv.Itoa(i), PassWord: strconv.Itoa(i)}
+		model.Insert(&user)
+	}
 }
 
 func TestRef(t *testing.T) {

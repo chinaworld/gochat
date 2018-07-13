@@ -1,7 +1,7 @@
 package model
 
 type HistoricalMsg struct {
-	Id         int    `json:"id" db:"id"`
+	Id         int    `json:"id" db:"id:pr"`
 	UserId     int    `json:"user_id" db:"user_id"`
 	SendUser   int    `json:"send_user" db:"send_user"`
 	Context    string `json:"context" db:"context"`

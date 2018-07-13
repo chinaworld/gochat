@@ -11,12 +11,10 @@ import (
 
 func ConHandler(con *net.TCPConn, id int) {
 
-	buf := bufio.NewReader(con)
-
 	ctx, close := context.WithCancel(context.Background())
-	dataChan := make(chan []byte, 1)
+	dataChan := make(chan []byte, 100)
 	go func(ctx2 context.Context) {
-
+		buf := bufio.NewReader(con)
 		for {
 			select {
 			case <-ctx2.Done():
@@ -45,11 +43,14 @@ func ConHandler(con *net.TCPConn, id int) {
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				fmt.Println(msg)
+				fmt.Println(id, "用户", msg)
 				//todo 消息转发
-				go msg.RelayMsg(id_map)
+				key := msg.RelayMsg(id_map)
+				if !key {
+					//con.Write([]byte("用户不在线"))
+				}
 
-			case <-time.After(5 * time.Second):
+			case <-time.After(10 * time.Second):
 				close()
 				id_map.Map.Delete(id)
 				fmt.Println(con.LocalAddr(), "心跳断开，断开连接")

@@ -9,8 +9,8 @@ type Config struct {
 }
 
 var Db_user = "root"
-var Db_password = "0"
-var Db_host = "0"
+var Db_password = "application"
+var Db_host = "118.25.218.132"
 var Db_port = "3306"
 var Db_DB = "gochat"
 

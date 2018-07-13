@@ -33,6 +33,7 @@ func Login(logindata []byte) (int, bool) {
 	fmt.Println(string(logindata))
 	if err := json.Unmarshal(logindata, &data); err != nil {
 		fmt.Println(err.Error())
+		panic(err)
 		return 0, false
 	}
 	sql := "select * from user where user_name = ? and password = ? "
