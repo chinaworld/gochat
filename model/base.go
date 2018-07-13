@@ -29,13 +29,22 @@ func checkErr(err error) {
 }
 
 //just select one! If have more than one show the frist one
-func Query(sql string, baseDb BaseDb, parse ...interface{}) (error) {
+func Query(sql_string string, baseDb BaseDb, parse ...interface{}) (error) {
 
 	//var column_index []reflect.Value
-	stemt, err := db.Prepare(sql)
-	checkErr(err)
+	var rows *sql.Rows
+	var err error
 
-	rows, err := stemt.Query(parse...)
+	if parse != nil {
+		stemt, err := db.Prepare(sql_string)
+		checkErr(err)
+		rows, err = stemt.Query(parse...)
+
+	} else {
+		rows, err = db.Query(sql_string)
+		checkErr(err)
+	}
+
 	defer rows.Close()
 	checkErr(err)
 
@@ -49,13 +58,12 @@ func Query(sql string, baseDb BaseDb, parse ...interface{}) (error) {
 	for k, _ := range dest {
 		dest[k] = &row[k]
 	}
-
 	//	for i := 0; rows.Next(); i++ {
-
+	rows.Next()
 	err = rows.Scan(dest...)
 	if err != nil {
 		fmt.Println(err.Error())
-		return err
+		//return err
 	}
 
 	for k, v1 := range column {
@@ -66,27 +74,27 @@ func Query(sql string, baseDb BaseDb, parse ...interface{}) (error) {
 				//fmt.Println(vu)
 				//check type is int or int32 ...
 				if v.Field(i).Type().Kind() >= 2 && v.Field(i).Type().Kind() <= 6 {
-					in, err := strconv.Atoi(vu)
-					if err != nil {
-						panic(err.Error())
-					}
-					v.Field(i).Set(reflect.ValueOf(in))
-				}
+					if vu != "" {
 
+						in, err := strconv.Atoi(vu)
+						if err != nil {
+							panic(err.Error())
+						}
+						v.Field(i).Set(reflect.ValueOf(in))
+					} else {
+						v.Field(i).Set(reflect.ValueOf(0))
+					}
+				}
 				if v.Field(i).Type().Kind() == reflect.String {
 					v.Field(i).Set(reflect.ValueOf(vu))
 				}
-
 				break
 			}
 
 		}
 
 	}
-
-	//	}
-
-	return err
+	return nil
 }
 
 func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error) {
@@ -126,7 +134,8 @@ func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error)
 		err = rows.Scan(dest...)
 		if err != nil {
 			fmt.Println(err.Error())
-			return err
+
+			//return err
 		}
 
 		for k, v1 := range column {
@@ -138,11 +147,15 @@ func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error)
 
 					//check type is int or int32 ...
 					if strv.Field(i).Type().Kind() >= 2 && strv.Field(i).Type().Kind() <= 6 {
-						in, err := strconv.Atoi(vu)
-						if err != nil {
-							panic(err.Error())
+						if vu != "" {
+							in, err := strconv.Atoi(vu)
+							if err != nil {
+								panic(err.Error())
+							}
+							strv.Field(i).Set(reflect.ValueOf(in))
+						} else {
+							strv.Field(i).Set(reflect.ValueOf(0))
 						}
-						strv.Field(i).Set(reflect.ValueOf(in))
 						break
 					}
 
@@ -163,4 +176,53 @@ func Querys(sql_string string, baseDb interface{}, parse ...interface{}) (error)
 	}
 
 	return err
+}
+
+func Insert(baseDb BaseDb) (int, error) {
+
+	//处理sql语句
+	v := reflect.ValueOf(baseDb)
+	var table_name string
+	var clouns []string
+	var values []interface{}
+	//fmt.Println(v.Type().Kind())
+	for i := 0; i < v.NumMethod(); i++ {
+		if v.Type().Method(i).Name == "GetTableName" {
+			vs := v.Method(i).Call(nil)
+			table_name = vs[0].Interface().(string)
+		}
+	}
+
+	for i := 0; i < v.Type().Elem().NumField(); i++ {
+		clouns = append(clouns, v.Type().Elem().Field(i).Tag.Get("db"))
+		values = append(values, v.Elem().Field(i).Interface())
+	}
+
+	// 用+拼接效率很低
+	sql_string := "INSERT INTO " + table_name + "("
+	value := "("
+	for k, v := range clouns {
+		sql_string = sql_string + v
+		value = value + "?"
+		if k+1 != len(clouns) {
+			sql_string = sql_string + ","
+			value = value + ","
+		}
+
+	}
+	sql_string = sql_string + ")" + "VALUES " + value + ")"
+
+	var err error
+
+	stemt, err := db.Prepare(sql_string)
+	checkErr(err)
+
+	rows, err := stemt.Exec(values...)
+	checkErr(err)
+
+	id, err := rows.LastInsertId()
+	checkErr(err)
+
+	fmt.Println(sql_string)
+	return int(id), err
 }

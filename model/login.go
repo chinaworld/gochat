@@ -18,17 +18,34 @@ type loginData struct {
 	Password string `json:"password"`
 }
 
+type LoginReturn struct {
+	Id     int `json:"id"`
+	Histor []HistoricalMsg
+}
+
 func (*User) GetTableName() string {
 	return "user"
 }
 
-func Login(logindata []byte) bool {
+func Login(logindata []byte) (int, bool) {
 	data := loginData{}
+
+	fmt.Println(string(logindata))
 	if err := json.Unmarshal(logindata, &data); err != nil {
 		fmt.Println(err.Error())
-		return false
+		return 0, false
 	}
+	sql := "select * from user where user_name = ? and password = ? "
+	user := User{}
 
-
+	err := Query(sql, &user, data.UserName, data.Password)
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0, false
+	}
+	if user.Id == 0 {
+		return 0, false
+	}
+	return user.Id, true
 
 }

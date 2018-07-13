@@ -4,8 +4,8 @@ import "testing"
 import (
 	"gochat/config"
 	"fmt"
-	"gochat/model"
 	"reflect"
+	"gochat/model"
 )
 
 func Test01(t *testing.T) {
@@ -16,10 +16,10 @@ func Test01(t *testing.T) {
 }
 
 type User struct {
-	Id       int    `db:"id"`
-	UserName string `db:"user_name"`
-	PassWord string `db:"password"'`
-	Time     string `db:"time"'`
+	Id         int    `db:"id"`
+	UserName   string `db:"user_name"`
+	PassWord   string `db:"password"'`
+	CreateTime int64  `db:"create_time"`
 }
 
 func (*User) GetTableName() string {
@@ -27,15 +27,21 @@ func (*User) GetTableName() string {
 }
 func TestDb(t *testing.T) {
 
-	user := []User{}
+	//	user := User{UserName: "lishuyang", PassWord: "123123123", CreateTime: time.Now().Unix()}
+
 	//sql := "select * from user where user_name = ? "
 	//model.Query(sql, &user, "dadfaf")
-	sql := "select * from user "
+	//	sql := "select * from user where id = ? and user_name = ?"
+	//sql := "select * from where user_name = ? and password = ? "
+	//sql := "select * from user where user_name = ? and password = ? "
+	//sql := "select * from user where user_name = ?  "
 
-	model.Querys(sql, &user)
-	fmt.Println(user)
+	//model.Query(sql, &user, "1")
+	//fmt.Println(user)
+	//model.Insert(&user)
+	h, err := model.GetHistoricalMsg(2)
+	fmt.Println(len(h), err)
 }
-
 
 func TestRef(t *testing.T) {
 

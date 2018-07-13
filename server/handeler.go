@@ -2,34 +2,34 @@ package server
 
 import (
 	"net"
-
 	"gochat/tool"
+	"bufio"
+	"fmt"
 	"time"
 	"context"
-	"fmt"
 )
 
-func ConHandler(con *net.TCPConn, id_map *tool.UserMap) {
+func ConHandler(con *net.TCPConn, id int) {
 
-	data := make([]byte, 1000)
+	buf := bufio.NewReader(con)
 
 	ctx, close := context.WithCancel(context.Background())
 	dataChan := make(chan []byte, 1)
 	go func(ctx2 context.Context) {
 
 		for {
-
 			select {
 			case <-ctx2.Done():
 				return
 			default:
-				con.Read(data)
-				if data != nil {
-					dataChan <- data
-					data = nil
+				//con.Read(data)
+				data, err := buf.ReadString('\n')
+				if err != nil {
+					fmt.Println(err.Error())
+					continue
 				}
+				dataChan <- []byte(data)
 			}
-
 		}
 	}(ctx)
 
@@ -40,19 +40,22 @@ func ConHandler(con *net.TCPConn, id_map *tool.UserMap) {
 				if len(d) < 1 {
 					continue
 				}
-				msg := tool.Msg{MsgByte: d}
-				err := msg.InitMsg()
+				msg := tool.Msg{}
+				err := msg.InitMsg(d)
 				if err != nil {
 					fmt.Println(err.Error())
 				}
-				fmt.Println(string(d))
+				fmt.Println(msg)
+				//todo 消息转发
+				go msg.RelayMsg(id_map)
 
 			case <-time.After(5 * time.Second):
 				close()
+				id_map.Map.Delete(id)
+				fmt.Println(con.LocalAddr(), "心跳断开，断开连接")
 				con.Close()
 				return
 			}
 		}
 	}(close)
-
 }
