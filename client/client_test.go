@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin/json"
 	"time"
-	"gochat/tool"
 	"strconv"
+	"bufio"
+	"gochat/tool"
 )
 
 const (
@@ -21,90 +22,53 @@ type loginData struct {
 
 func Test_cli_main(t *testing.T) {
 
-	for i := 4; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		conn, err := net.Dial("tcp", addr)
 		if err != nil {
 			fmt.Println("连接服务端失败:", err.Error())
 			return
 		}
 		fmt.Println("已连接服务器")
-		defer conn.Close()
-		go Client(conn, strconv.Itoa(i), strconv.Itoa(i))
+
+		go Client(conn, strconv.Itoa(i), strconv.Itoa(i), i)
 	}
 	time.Sleep(time.Hour)
 }
 
-func Client(conn net.Conn, username string, password string) {
-	sms := make([]byte, 128)
+func Client(conn net.Conn, username string, password string, i int) {
+	//登录
 
 	login := loginData{UserName: username, Password: password}
 	data, _ := json.Marshal(login)
-
-	sms = []byte(data)
-	fmt.Print("请输入要发送的消息:")
-	//	_, err := fmt.Scan(&sms)
-	//	if err != nil {
-	//		fmt.Println("数据输入异常:", err.Error())
-	//	}
+	sms := []byte(data)
 
 	sms = append(sms, '\n')
 	conn.Write(sms)
 
-	for {
-		msg := tool.Msg{UserId: 1006, FormUserId: 1, Content: password}
-		data, _ := json.Marshal(msg)
+	go func() {
+		for {
+			//发送消息
+			msg := tool.Msg{UserId: 2108 + i, FormUserId: 2108, Content: password}
+			data, _ := json.Marshal(msg)
 
-		conn.Write(append([]byte(data), '\n'))
+			conn.Write(append([]byte(data), '\n'))
+			time.Sleep(time.Second)
+		}
+	}()
 
-		//time.Sleep(3 * time.Second)
-		//
-		go func() {
-			buf := make([]byte, 128)
-			c, err := conn.Read(buf)
+	go func() {
+		for {
+			defer conn.Close()
+			//接受消息
+			buf := bufio.NewReader(conn)
+			c, err := buf.ReadString('\n')
 			if err != nil {
 				fmt.Println("读取服务器数据异常:", err.Error())
+				break
 			}
-			fmt.Println(string(buf[0:c]))
-		}()
-	}
+			fmt.Println(c)
+		}
 
-}
+	}()
 
-func Test_cli_main2(t *testing.T) {
-
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		fmt.Println("连接服务端失败:", err.Error())
-		return
-	}
-	fmt.Println("已连接服务器")
-	defer conn.Close()
-	go Client(conn, strconv.Itoa(2), strconv.Itoa(2))
-	time.Sleep(time.Hour)
-}
-
-func Test_cli_main3(t *testing.T) {
-
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		fmt.Println("连接服务端失败:", err.Error())
-		return
-	}
-	fmt.Println("已连接服务器")
-	defer conn.Close()
-	go Client(conn, strconv.Itoa(3), strconv.Itoa(3))
-	time.Sleep(time.Hour)
-}
-
-func Test_cli_main4(t *testing.T) {
-
-	conn, err := net.Dial("tcp", addr)
-	if err != nil {
-		fmt.Println("连接服务端失败:", err.Error())
-		return
-	}
-	fmt.Println("已连接服务器")
-	defer conn.Close()
-	go Client(conn, strconv.Itoa(4), strconv.Itoa(4))
-	time.Sleep(time.Hour)
 }

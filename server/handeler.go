@@ -7,14 +7,15 @@ import (
 	"fmt"
 	"time"
 	"context"
+	"runtime"
 )
 
 func ConHandler(con *net.TCPConn, id int) {
 
 	ctx, close := context.WithCancel(context.Background())
 	dataChan := make(chan []byte, 100)
+	buf := bufio.NewReader(con)
 	go func(ctx2 context.Context) {
-		buf := bufio.NewReader(con)
 		for {
 			select {
 			case <-ctx2.Done():
@@ -23,7 +24,10 @@ func ConHandler(con *net.TCPConn, id int) {
 				//con.Read(data)
 				data, err := buf.ReadString('\n')
 				if err != nil {
-					fmt.Println(err.Error())
+					if err.Error() == "EOF" {
+						runtime.Goexit()
+					}
+					tool.LogDebug.Println(err)
 					continue
 				}
 				dataChan <- []byte(data)
@@ -41,7 +45,7 @@ func ConHandler(con *net.TCPConn, id int) {
 				msg := tool.Msg{}
 				err := msg.InitMsg(d)
 				if err != nil {
-					fmt.Println(err.Error())
+					tool.LogDebug.Println(err)
 				}
 				fmt.Println(id, "用户", msg)
 				//todo 消息转发
@@ -53,7 +57,7 @@ func ConHandler(con *net.TCPConn, id int) {
 			case <-time.After(10 * time.Second):
 				close()
 				id_map.Map.Delete(id)
-				fmt.Println(con.LocalAddr(), "心跳断开，断开连接")
+				tool.LogDebug.Println(con.RemoteAddr(), "心跳断开，断开连接")
 				con.Close()
 				return
 			}

@@ -226,6 +226,8 @@ func Insert(baseDb BaseDb) (int, error) {
 	stemt, err := db.Prepare(sql_string)
 	checkErr(err)
 
+	defer stemt.Close()
+
 	rows, err := stemt.Exec(values...)
 	checkErr(err)
 

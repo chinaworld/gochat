@@ -43,7 +43,7 @@ func TestDb(t *testing.T) {
 	//h, err := model.GetHistoricalMsg(2)
 	//fmt.Println(len(h), err)
 
-	for i := 4; i < 1000; i++ {
+	for i := 1001; i < 50000; i++ {
 		user := User{UserName: strconv.Itoa(i), PassWord: strconv.Itoa(i)}
 		model.Insert(&user)
 	}
