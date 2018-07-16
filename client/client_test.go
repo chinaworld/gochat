@@ -4,12 +4,12 @@ import (
 	"testing"
 	"net"
 	"fmt"
-	"github.com/gin-gonic/gin/json"
 	"time"
 	"strconv"
 	"bufio"
 	"gochat/tool"
 	"strings"
+	"encoding/json"
 )
 
 const (

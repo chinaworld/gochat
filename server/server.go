@@ -6,8 +6,8 @@ import (
 	"gochat/tool"
 	"bufio"
 	"gochat/model"
-	"github.com/gin-gonic/gin/json"
 	"strconv"
+	"encoding/json"
 )
 
 var id_map = &tool.UserMap{}
