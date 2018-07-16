@@ -48,7 +48,7 @@ func (this *Msg) RelayMsg(id_map *UserMap) bool {
 		return false
 	}
 	con := con_interface.(*net.TCPConn)
-	data := append([]byte(this.Content), '\n')
+	data := append([]byte(this.Content))
 	con.Write(data)
 	return true
 }

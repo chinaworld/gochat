@@ -10,11 +10,15 @@ import (
 	"gochat/tool"
 	"strings"
 	"encoding/json"
+	"os"
 )
 
 const (
-	addr = "127.0.0.1:8888"
+	//addr = "localhost:8888"
+	addr = "localhost:8888"
+
 )
+
 
 type loginData struct {
 	UserName string `json:"user_name"`
@@ -61,6 +65,7 @@ func main() {
 			m, err := buf.ReadString('\n')
 			if err != nil {
 				fmt.Println("a err:", err.Error())
+				return
 			}
 			msg = append(msg, m)
 		}
@@ -107,14 +112,16 @@ func main() {
 				goto Again
 			}
 			fmt.Println("please enter context")
-			fmt.Scanln(&context)
+
+			buf := bufio.NewReader(os.Stdin)
+			context, _ = buf.ReadString('\n')
 
 			m := Msg{UserId: id, FormUserId: user_id_int, Content: context}
 			data, err := json.Marshal(m)
 			if err != nil {
 				fmt.Println("enter have a err! please enter again")
 			}
-			data = append(data, '\n')
+			data = append(data)
 			_, err = con.Write(data)
 			if err != nil {
 				fmt.Println(err.Error())
