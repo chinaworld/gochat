@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"bufio"
 	"gochat/tool"
+	"strings"
 )
 
 const (
@@ -48,7 +49,8 @@ func main() {
 	con.Write(sms)
 
 	id_string, err := buf.ReadString('\n')
-	id, _ := strconv.Atoi(id_string)
+	id_strings := strings.Split(id_string, "\n")
+	id, _ := strconv.Atoi(id_strings[0])
 
 	fmt.Println("链接成功  你的ID为：", id)
 	msg := []string{}

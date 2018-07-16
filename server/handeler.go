@@ -8,6 +8,7 @@ import (
 	"time"
 	"context"
 	"runtime"
+	"strings"
 )
 
 func ConHandler(con *net.TCPConn, id int) {
@@ -30,7 +31,8 @@ func ConHandler(con *net.TCPConn, id int) {
 					tool.LogDebug.Println(err)
 					runtime.Goexit()
 				}
-				dataChan <- []byte(data)
+				datas := strings.Split(data, "\n")
+				dataChan <- []byte(datas[0])
 			}
 		}
 	}(ctx)
