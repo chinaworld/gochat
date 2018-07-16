@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"gochat/model"
 	"github.com/gin-gonic/gin/json"
+	"strconv"
 )
 
 var id_map = &tool.UserMap{}
@@ -53,6 +54,10 @@ func ServerRun(tcp_listen *net.TCPListener) error {
 
 		//	fmt.Println()
 		tool.LogDebug.Println("登录成功 建立连接", con.RemoteAddr())
+		id_string := strconv.Itoa(id)
+
+		con.Write(append([]byte(id_string), '\n'))
+
 		id_map.Map.Store(id, con)
 
 		go func(gocon *net.TCPConn) {

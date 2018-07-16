@@ -28,7 +28,7 @@ func ConHandler(con *net.TCPConn, id int) {
 						runtime.Goexit()
 					}
 					tool.LogDebug.Println(err)
-					continue
+					runtime.Goexit()
 				}
 				dataChan <- []byte(data)
 			}
@@ -39,7 +39,7 @@ func ConHandler(con *net.TCPConn, id int) {
 		for {
 			select {
 			case d := <-dataChan:
-				if len(d) < 1 {
+				if len(d) <= 1 {
 					continue
 				}
 				msg := tool.Msg{}
