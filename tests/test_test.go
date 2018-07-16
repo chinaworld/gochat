@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strconv"
 	"gochat/model"
+	"gochat/tool"
+	"runtime"
 )
 
 func Test01(t *testing.T) {
@@ -26,6 +28,27 @@ type User struct {
 func (*User) GetTableName() string {
 	return "user"
 }
+
+func PrintStack() {
+	var buf [4096]byte
+	n := runtime.Stack(buf[:], false)
+	fmt.Printf("==> %s\n", string(buf[:n]))
+}
+
+func TestLog(t *testing.T) {
+
+
+	tool.LogDebug, _ = tool.NewLog()
+
+	tool.LogDebug.Println("11")
+
+	//panic("123123")
+
+	//tool.LogDebug.Println(runtime.Caller(0))
+
+		fmt.Println("11111")
+}
+
 func TestDb(t *testing.T) {
 
 	//	user := User{UserName: "lishuyang", PassWord: "123123123", CreateTime: time.Now().Unix()}

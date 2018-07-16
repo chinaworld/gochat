@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"gochat/tool"
 )
 
 type BaseDb interface {
@@ -24,7 +25,7 @@ func init() {
 }
 func checkErr(err error) {
 	if err != nil {
-		fmt.Println(err.Error())
+		tool.LogDebug.Println("[Err]", err)
 		panic(err)
 	}
 }

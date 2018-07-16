@@ -1,4 +1,4 @@
-package tool
+package msg
 
 import (
 	"encoding/json"

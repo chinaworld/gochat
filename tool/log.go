@@ -4,6 +4,7 @@ import (
 	"time"
 	"os"
 	"log"
+	"runtime/debug"
 )
 
 var LogDebug *Logdebug
@@ -14,7 +15,7 @@ type Logdebug struct {
 }
 
 func NewLog() (*Logdebug, *os.File) {
-	log.SetFlags(10)
+	log.SetFlags(3)
 	now_time := time.Now().Format("2006-01-02")
 	file_name := now_time + "-log.log"
 
@@ -33,8 +34,13 @@ func NewLog() (*Logdebug, *os.File) {
 }
 
 func (this *Logdebug) Println(v ...interface{}) {
+
+	stack := string(debug.Stack())
 	if this.Debug {
 		log.Println(v)
+		log.Println(stack)
+
 	}
 	this.Log.Println(v)
+	this.Log.Println(stack)
 }
