@@ -12,14 +12,14 @@ import (
 func main() {
 	var logfile *os.File
 
+	tool.LogDebug, logfile = tool.NewLog()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	config := config.Config{}
 	config.Port = 8888
-	config.Ip = net.ParseIP("127.0.0.1")
+	config.Ip = net.ParseIP("localhost")
 	config.SetConfig()
 	tcp_listen := server.GetServer(&config)
 
-	tool.LogDebug, logfile = tool.NewLog()
 	defer logfile.Close()
 
 	server.ServerRun(tcp_listen)
