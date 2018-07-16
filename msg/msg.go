@@ -48,6 +48,8 @@ func (this *Msg) RelayMsg(id_map *UserMap) bool {
 		return false
 	}
 	con := con_interface.(*net.TCPConn)
+
+	//这个地方客户端传上来遍是带有分隔符的  所有写入时不用带分隔符
 	data := append([]byte(this.Content))
 	con.Write(data)
 	return true
