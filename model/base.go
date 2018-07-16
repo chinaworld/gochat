@@ -14,6 +14,27 @@ type BaseDb interface {
 	GetTableName() string
 }
 
+type ConnectionPoll struct {
+	max_connection  int
+	connection_poll []*sql.DB
+	db              *sql.DB
+}
+
+func (this *ConnectionPoll) GetDb() (*sql.DB, error) {
+	if len(this.connection_poll) > 0 {
+		return this.connection_poll[0], nil
+	}
+
+	sql_link := config.Db_user + ":" + config.Db_password + "@tcp(" + config.Db_host +
+		":" + config.Db_port + ")/" + config.Db_DB + "?charset=utf8"
+	db, err := sql.Open("mysql", sql_link)
+	return db, err
+}
+
+func (this *ConnectionPoll) Init() {
+
+}
+
 var db *sql.DB
 
 func init() {
@@ -23,6 +44,7 @@ func init() {
 	db, err = sql.Open("mysql", sql_link)
 	checkErr(err)
 }
+
 func checkErr(err error) {
 	if err != nil {
 		tool.LogDebug.Println("[Err]", err)
