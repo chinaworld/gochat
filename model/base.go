@@ -14,27 +14,32 @@ type BaseDb interface {
 	GetTableName() string
 }
 
-type ConnectionPoll struct {
-	max_connection  int
-	connection_poll []*sql.DB
-	db              *sql.DB
-}
-
-func (this *ConnectionPoll) GetDb() (*sql.DB, error) {
-	if len(this.connection_poll) > 0 {
-		return this.connection_poll[0], nil
-	}
-
-	sql_link := config.Db_user + ":" + config.Db_password + "@tcp(" + config.Db_host +
-		":" + config.Db_port + ")/" + config.Db_DB + "?charset=utf8"
-	db, err := sql.Open("mysql", sql_link)
-	return db, err
-}
-
-func (this *ConnectionPoll) Init() {
-
-}
-
+//type ConnectionPoll struct {
+//	max_connection int
+//
+//	con_chan chan *sql.DB
+//}
+//
+//func (this *ConnectionPoll) GetCon() (*sql.DB, error) {
+//	if len(this.con_chan) > 0 {
+//		con := <-this.con_chan
+//		return con, nil
+//	}
+//
+//	sql_link := config.Db_user + ":" + config.Db_password + "@tcp(" + config.Db_host +
+//		":" + config.Db_port + ")/" + config.Db_DB + "?charset=utf8"
+//	db, err := sql.Open("mysql", sql_link)
+//	return db, err
+//}
+//
+//func (this *ConnectionPoll) PutCon(con *sql.DB) {
+//	this.con_chan <- con
+//}
+//
+//func (this *ConnectionPoll) Init() {
+//	this.con_chan = make(chan *sql.DB, this.max_connection)
+//}
+//DB就是最牛逼的连接池，我还写个锤子
 var db *sql.DB
 
 func init() {
